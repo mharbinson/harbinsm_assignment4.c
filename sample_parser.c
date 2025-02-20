@@ -33,7 +33,9 @@ void cd_func(struct command_line *input)
 	if(input->argc == 1){
 		chdir(getenv("HOME"));
 	}else{
-
+		if(chdir(input->argv[1]) != 0){
+			perror("cd");
+		}
 	}
 }
 
@@ -41,7 +43,7 @@ void cd_func(struct command_line *input)
 void check_input(struct command_line *input)
 {
 	if(input->argv[0] == NULL || input->argv[0][0] == '#' || input->argv[0][0] == '\n'){
-		printf("here");
+		//printf("here");
 	}else if(strcmp(input->argv[0], "exit") == 0){
 		printf("exit here");
 		exit_func();
