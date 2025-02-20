@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define INPUT_LENGTH 2048
 #define MAX_ARGS		 512
@@ -22,6 +23,35 @@ struct command_line
 	bool is_bg;
 };
 
+void exit_func()
+{
+	exit(1);
+}
+
+void cd_func(struct command_line *input)
+{
+	if(input->argc == 1){
+		chdir(getenv("HOME"));
+	}else{
+
+	}
+}
+
+
+void check_input(struct command_line *input)
+{
+	if(input->argv[0] == NULL || input->argv[0][0] == '#' || input->argv[0][0] == '\n'){
+		printf("here");
+	}else if(strcmp(input->argv[0], "exit") == 0){
+		printf("exit here");
+		exit_func();
+	}else if(strcmp(input->argv[0], "cd")){
+	 	cd_func(input);
+	}
+	//else if(strcmp(input->argv[0], "status")){
+	// 	status_func();
+	// }
+}
 
 struct command_line *parse_input()
 {
@@ -57,6 +87,12 @@ int main()
 	while(true)
 	{
 		curr_command = parse_input();
+		// printf("%s",curr_command->argv[0]);
+		// printf("%s" ,curr_command->input_file);
+		// printf("%s" ,curr_command->output_file);
+		// printf("%d",curr_command->is_bg);
+		check_input(curr_command);
+
 
 	}
 	return EXIT_SUCCESS;
