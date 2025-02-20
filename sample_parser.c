@@ -47,7 +47,7 @@ void check_input(struct command_line *input)
 	}else if(strcmp(input->argv[0], "exit") == 0){
 		printf("exit here");
 		exit_func();
-	}else if(strcmp(input->argv[0], "cd")){
+	}else if(strcmp(input->argv[0], "cd") == 0){
 	 	cd_func(input);
 	}
 	//else if(strcmp(input->argv[0], "status")){
