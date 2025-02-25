@@ -9,10 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define INPUT_LENGTH 2048
 #define MAX_ARGS		 512
 
+int status = 0;
 
 struct command_line
 {
@@ -30,14 +32,52 @@ void exit_func()
 
 void cd_func(struct command_line *input)
 {
+	char path[MAX_ARGS];
+	getcwd(path,sizeof path);
+
 	if(input->argc == 1){
 		chdir(getenv("HOME"));
 	}else{
 		if(chdir(input->argv[1]) != 0){
+			strcat(path,"/");
+    		strcat(path,input->argv[1]);
+    		chdir(path);
 			perror("cd");
 		}
 	}
+	getcwd(path,sizeof path);
+	printf("%s", getenv("PWD"));
 }
+
+void status_func(int input){
+	if(WIFEXITED(status)){
+		printf("%d", WEXITSTATUS(status));
+	}else if(WIFSIGNALED(status)){
+		printf("%d", WTERMSIG(status));
+	}
+}
+
+
+void other_commands(){
+	pid_t pid; 
+	pid = fork();
+
+	switch(pid){
+		case -1:
+			perror("fork() failed\n");
+			exit(1);
+			break;
+		case 0:
+			printf("This is the child process\n");
+			break;
+		default:
+			printf("This is the parent process\n");
+			break;
+
+
+	}
+	
+};
 
 
 void check_input(struct command_line *input)
@@ -49,10 +89,11 @@ void check_input(struct command_line *input)
 		exit_func();
 	}else if(strcmp(input->argv[0], "cd") == 0){
 	 	cd_func(input);
+	}else if(strcmp(input->argv[0], "status") == 0){
+	 	status_func(status);	
+	}else{
+		other_commands();
 	}
-	//else if(strcmp(input->argv[0], "status")){
-	// 	status_func();
-	// }
 }
 
 struct command_line *parse_input()
