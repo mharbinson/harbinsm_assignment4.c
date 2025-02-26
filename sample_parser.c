@@ -58,7 +58,7 @@ void status_func(int input){
 }
 
 
-void other_commands(){
+void other_commands(struct command_line *input){
 	pid_t pid; 
 	pid = fork();
 
@@ -69,9 +69,14 @@ void other_commands(){
 			break;
 		case 0:
 			printf("This is the child process\n");
+			if(execvp(input->argv[0], input->argv) < 0){
+				perror("execvp failed");
+				break;
+			}
 			break;
 		default:
 			printf("This is the parent process\n");
+			waitpid(pid, &status, 0);
 			break;
 
 
@@ -92,7 +97,7 @@ void check_input(struct command_line *input)
 	}else if(strcmp(input->argv[0], "status") == 0){
 	 	status_func(status);	
 	}else{
-		other_commands();
+		other_commands(input);
 	}
 }
 
