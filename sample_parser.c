@@ -10,11 +10,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #define INPUT_LENGTH 2048
 #define MAX_ARGS		 512
 
 int status = 0;
+int input_FD;
+int output_FD;
 
 struct command_line
 {
@@ -68,15 +71,44 @@ void other_commands(struct command_line *input){
 			exit(1);
 			break;
 		case 0:
-			printf("This is the child process\n");
+			// printf("This is the child process\n");
+			if(input->input_file){
+				input_FD = open(input->input_file, O_RDONLY);
+					if(input_FD < 0){
+						perror("cannot open file input");
+						exit(1);
+					}
+					dup2(input_FD, STDIN_FILENO);
+					close(input_FD);
+			}else if(input->is_bg){
+				int input_FD = open("/dev/null", O_RDONLY);
+                dup2(input_FD, STDIN_FILENO);
+                close(input_FD);
+			} if (input->output_file) {
+                int output_FD = open(input->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (output_FD < 0) {
+                    perror("cannot open output file");
+                    exit(1);
+                }
+                dup2(output_FD, STDOUT_FILENO);
+                close(output_FD);
+            }
+
+
+
+
 			if(execvp(input->argv[0], input->argv) < 0){
 				perror("execvp failed");
 				break;
 			}
 			break;
 		default:
-			printf("This is the parent process\n");
-			waitpid(pid, &status, 0);
+			if(input->is_bg){
+				printf("Background process PID: %d\n", pid);
+			}else{
+				// printf("This is the parent process\n");
+				waitpid(pid, &status, 0);
+			}
 			break;
 
 
