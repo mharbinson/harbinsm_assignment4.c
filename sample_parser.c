@@ -19,6 +19,7 @@
 int status = 0;
 int input_FD;
 int output_FD;
+int is_fg = 0;
 
 
 struct command_line
@@ -34,13 +35,19 @@ struct command_line
 void handle_SIGINT(int sig){
 	char* message = "Caught SIGINT, sleeping for 10 seconds\n";
 	write(STDOUT_FILENO, message, 39);
-	// // Sleep for 10 seconds
-	// sleep(10);
+	sleep(10);
 }
 
 
 void handle_SIGTSTP(int sig) {
-    char* message = "Caught SIGTSTP (Ctrl+Z)\n";
+    char* message;
+	if(is_fg){
+		message = "Exiting foreground process\n";
+		is_fg = 0;
+	}else{
+		message = "Entering foreground process\n";
+		is_fg = 1;
+	}
     write(STDOUT_FILENO, message, 25);
 }
   
@@ -86,6 +93,14 @@ void other_commands(struct command_line *input){
 			break;
 		case 0:
 			// printf("This is the child process\n");
+			if(input->is_bg == false){
+				struct sigaction sa1;
+                sa1.sa_handler = SIG_DFL;
+                sigemptyset(&sa1.sa_mask);
+                sa1.sa_flags = 0;
+                sigaction(SIGINT, &sa1, NULL);
+			}
+
 			if(input->input_file){
 				input_FD = open(input->input_file, O_RDONLY);
 					if(input_FD < 0){
@@ -117,7 +132,7 @@ void other_commands(struct command_line *input){
 			}
 			break;
 		default:
-			if(input->is_bg){
+			if(input->is_bg && is_fg == false){
 				printf("Background process PID: %d\n", pid);
 			}else{
 				// printf("This is the parent process\n");
