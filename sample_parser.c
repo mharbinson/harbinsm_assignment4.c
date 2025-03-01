@@ -188,7 +188,7 @@ int main()
     SIGSTOP_action.sa_handler = handle_SIGSTOP;
     sigemptyset(&SIGSTOP_action.sa_mask);
     SIGSTOP_action.sa_flags = 0;
-    sigaction(SIGTSTP, &SIGSTOP_action, NULL);
+    sigaction(SIGSTOP, &SIGSTOP_action, NULL);
 
 	struct command_line *curr_command;
 
