@@ -39,7 +39,7 @@ void handle_SIGINT(int sig){
 }
 
 
-void handle_SIGSTOP(int sig) {
+void handle_SIGTSTP(int sig) {
     char* message = "Caught SIGTSTP (Ctrl+Z)\n";
     write(STDOUT_FILENO, message, 25);
 }
@@ -177,18 +177,18 @@ struct command_line *parse_input()
 int main()
 {
 
-	struct sigaction SIGINT_action;
-    struct sigaction SIGSTOP_action;
+	struct sigaction SIGINT_action = {0};
+    struct sigaction SIGTSTP_action = {0};
 
     SIGINT_action.sa_handler = handle_SIGINT;
     sigemptyset(&SIGINT_action.sa_mask);
     SIGINT_action.sa_flags = 0;
     sigaction(SIGINT, &SIGINT_action, NULL);
 
-    SIGSTOP_action.sa_handler = handle_SIGSTOP;
-    sigemptyset(&SIGSTOP_action.sa_mask);
-    SIGSTOP_action.sa_flags = 0;
-    sigaction(SIGSTOP, &SIGSTOP_action, NULL);
+    SIGTSTP_action.sa_handler = handle_SIGTSTP;
+    sigemptyset(&SIGTSTP_action.sa_mask);
+    SIGTSTP_action.sa_flags = 0;
+    sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
 	struct command_line *curr_command;
 
