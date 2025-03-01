@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #define INPUT_LENGTH 2048
 #define MAX_ARGS		 512
@@ -18,6 +19,7 @@
 int status = 0;
 int input_FD;
 int output_FD;
+
 
 struct command_line
 {
@@ -27,6 +29,21 @@ struct command_line
 	char *output_file;
 	bool is_bg;
 };
+
+
+void handle_SIGINT(int sig){
+	char* message = "Caught SIGINT, sleeping for 10 seconds\n";
+	write(STDOUT_FILENO, message, 39);
+	// // Sleep for 10 seconds
+	// sleep(10);
+}
+
+
+void handle_SIGSTOP(int sig) {
+    char* message = "Caught SIGTSTP (Ctrl+Z)\n";
+    write(STDOUT_FILENO, message, 25);
+}
+  
 
 void exit_func()
 {
@@ -41,10 +58,7 @@ void cd_func(struct command_line *input)
 	if(input->argc == 1){
 		chdir(getenv("HOME"));
 	}else{
-		if(chdir(input->argv[1]) != 0){
-			strcat(path,"/");
-    		strcat(path,input->argv[1]);
-    		chdir(path);
+		if(chdir(input->argv[1]) != 0){    		
 			perror("cd");
 		}
 	}
@@ -87,7 +101,7 @@ void other_commands(struct command_line *input){
 			} if (input->output_file) {
                 int output_FD = open(input->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
                 if (output_FD < 0) {
-                    perror("cannot open output file");
+                    perror("cannot open file outputgog");
                     exit(1);
                 }
                 dup2(output_FD, STDOUT_FILENO);
@@ -162,6 +176,20 @@ struct command_line *parse_input()
 
 int main()
 {
+
+	struct sigaction SIGINT_action;
+    struct sigaction SIGSTOP_action;
+
+    SIGINT_action.sa_handler = handle_SIGINT;
+    sigemptyset(&SIGINT_action.sa_mask);
+    SIGINT_action.sa_flags = 0;
+    sigaction(SIGINT, &SIGINT_action, NULL);
+
+    SIGSTOP_action.sa_handler = handle_SIGSTOP;
+    sigemptyset(&SIGSTOP_action.sa_mask);
+    SIGSTOP_action.sa_flags = 0;
+    sigaction(SIGTSTP, &SIGSTOP_action, NULL);
+
 	struct command_line *curr_command;
 
 	while(true)
