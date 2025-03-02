@@ -93,7 +93,7 @@ void other_commands(struct command_line *input){
 			break;
 		case 0:
 			// printf("This is the child process\n");
-			if(input->is_bg == false){
+			if(input->is_bg == false || is_fg){
 				struct sigaction sa1;
                 sa1.sa_handler = SIG_DFL;
                 sigemptyset(&sa1.sa_mask);
@@ -109,7 +109,7 @@ void other_commands(struct command_line *input){
 					}
 					dup2(input_FD, STDIN_FILENO);
 					close(input_FD);
-			}else if(input->is_bg){
+			}else if(input->is_bg || is_fg == false){
 				int input_FD = open("/dev/null", O_RDONLY);
                 dup2(input_FD, STDIN_FILENO);
                 close(input_FD);
@@ -137,6 +137,10 @@ void other_commands(struct command_line *input){
 			}else{
 				// printf("This is the parent process\n");
 				waitpid(pid, &status, 0);
+				if (WIFSIGNALED(status)) {
+                    printf("terminated by signal %d\n", WTERMSIG(status));
+                    fflush(stdout);
+                }
 			}
 			break;
 
