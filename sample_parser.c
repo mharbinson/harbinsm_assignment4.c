@@ -137,10 +137,6 @@ void other_commands(struct command_line *input){
 			}else{
 				// printf("This is the parent process\n");
 				waitpid(pid, &status, 0);
-				if (WIFSIGNALED(status)) {
-                    printf("terminated by signal %d\n", WTERMSIG(status));
-                    fflush(stdout);
-                }
 			}
 			break;
 
