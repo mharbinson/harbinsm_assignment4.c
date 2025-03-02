@@ -133,7 +133,7 @@ void other_commands(struct command_line *input){
 			break;
 		default:
 			if(input->is_bg && is_fg == false){
-				printf("Background process PID: %d\n", pid);
+				printf("Background pid is %d\n", pid);
 			}else{
 				// printf("This is the parent process\n");
 				waitpid(pid, &status, 0);
