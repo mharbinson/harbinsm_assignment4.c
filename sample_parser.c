@@ -75,9 +75,9 @@ void cd_func(struct command_line *input)
 
 void status_func(int input){
 	if(WIFEXITED(status)){
-		printf("%d", WEXITSTATUS(status));
+		printf("exited value %d\n", WEXITSTATUS(status));
 	}else if(WIFSIGNALED(status)){
-		printf("%d", WTERMSIG(status));
+		printf("terminated by signal %d\n", WTERMSIG(status));
 	}
 }
 
