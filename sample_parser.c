@@ -48,7 +48,7 @@ void handle_SIGTSTP(int sig) {
 		message = "Entering foreground process\n";
 		is_fg = 1;
 	}
-    write(STDOUT_FILENO, message, 25);
+    write(STDOUT_FILENO, message, 27);
 }
   
 
